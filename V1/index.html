@@ -5,23 +5,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>課堂互動工具箱</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1a1a2e">
+<meta name="theme-color" content="#faf3e8">
 <link rel="apple-touch-icon" href="icon.svg">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Lilita+One&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #1a1a2e;
-    --card: #16213e;
-    --accent: #e94560;
-    --accent2: #0f3460;
-    --gold: #f5c518;
-    --text: #eaeaea;
-    --text-dim: #8892a4;
+    --bg: #faf3e8;
+    --card: #ffffff;
+    --shadow: rgba(120,90,50,0.08);
+    --text: #2d2419;
+    --text-dim: #9a8b73;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     font-family: 'Noto Sans TC', sans-serif;
     background: var(--bg);
+    background-image: radial-gradient(circle at 20% 20%, rgba(231,76,60,0.04) 0%, transparent 50%),
+                      radial-gradient(circle at 80% 80%, rgba(52,152,219,0.04) 0%, transparent 50%);
     color: var(--text);
     min-height: 100vh;
   }
@@ -35,11 +35,10 @@
     margin-bottom: 48px;
   }
   header h1 {
-    font-family: 'Fredoka', 'Noto Sans TC', sans-serif;
+    font-family: 'Lilita One', 'Noto Sans TC', sans-serif;
     font-size: 2.6rem;
-    background: linear-gradient(135deg, var(--gold), var(--accent));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--text);
+    letter-spacing: 2px;
     margin-bottom: 8px;
   }
   header p {
@@ -58,10 +57,10 @@
     border-radius: 20px;
     padding: 32px 24px;
     text-align: center;
-    border: 1px solid rgba(255,255,255,0.06);
     text-decoration: none;
     color: var(--text);
-    transition: transform 0.2s, box-shadow 0.2s, border-color 0.3s;
+    box-shadow: 0 2px 12px var(--shadow);
+    transition: transform 0.2s, box-shadow 0.2s;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -69,8 +68,7 @@
   }
   .tool-card:hover {
     transform: translateY(-6px);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-    border-color: rgba(255,255,255,0.12);
+    box-shadow: 0 8px 32px rgba(120,90,50,0.15);
   }
 
   .tool-icon {
@@ -78,9 +76,10 @@
     line-height: 1;
   }
   .tool-name {
-    font-family: 'Fredoka', 'Noto Sans TC', sans-serif;
+    font-family: 'Lilita One', 'Noto Sans TC', sans-serif;
     font-size: 1.35rem;
     font-weight: 700;
+    letter-spacing: 1px;
   }
   .tool-desc {
     color: var(--text-dim);
@@ -89,7 +88,7 @@
   }
   .tool-tag {
     display: inline-block;
-    background: rgba(255,255,255,0.06);
+    background: rgba(0,0,0,0.04);
     padding: 4px 14px;
     border-radius: 20px;
     font-size: 0.78rem;
@@ -97,7 +96,7 @@
   }
 
   /* Color accent per card */
-  .tool-card:nth-child(1) { border-top: 3px solid var(--accent); }
+  .tool-card:nth-child(1) { border-top: 3px solid #e74c3c; }
   .tool-card:nth-child(2) { border-top: 3px solid #448aff; }
   .tool-card:nth-child(3) { border-top: 3px solid #6c63ff; }
   .tool-card:nth-child(4) { border-top: 3px solid #2ecc71; }

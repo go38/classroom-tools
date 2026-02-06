@@ -5,27 +5,28 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>教室座位表</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1a1a2e">
+<meta name="theme-color" content="#faf3e8">
 <link rel="apple-touch-icon" href="icon.svg">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Lilita+One&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #1a1a2e;
-    --card: #16213e;
+    --bg: #faf3e8;
+    --card: #ffffff;
+    --shadow: rgba(120,90,50,0.08);
     --amber: #ff9800;
     --amber-light: #ffb74d;
     --amber-dark: #e68900;
-    --text: #eaeaea;
-    --text-dim: #8892a4;
-    --seat-bg: #1e2a45;
-    --seat-hover: #253350;
-    --seat-occupied: #2a3a5c;
+    --text: #2d2419;
+    --text-dim: #9a8b73;
+    --seat-bg: #fff8f0;
+    --seat-hover: #fff0e0;
+    --seat-occupied: #fff3e0;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     font-family: 'Noto Sans TC', sans-serif;
     background: var(--bg);
-    background-image: radial-gradient(circle at 30% 20%, rgba(255,152,0,0.05) 0%, transparent 50%),
+    background-image: radial-gradient(circle at 30% 20%, rgba(255,152,0,0.04) 0%, transparent 50%),
                       radial-gradient(circle at 70% 80%, rgba(255,152,0,0.03) 0%, transparent 50%);
     color: var(--text);
     min-height: 100vh;
@@ -47,10 +48,10 @@
 
   header { text-align: center; margin-bottom: 24px; }
   header h1 {
-    font-family: 'Fredoka', 'Noto Sans TC', sans-serif;
+    font-family: 'Lilita One', 'Noto Sans TC', sans-serif;
     font-size: 2.4rem;
-    color: var(--amber);
-    letter-spacing: 1px;
+    color: var(--text);
+    letter-spacing: 2px;
   }
   header p { color: var(--text-dim); font-size: 0.95rem; margin-top: 4px; }
 
@@ -60,7 +61,7 @@
     border-radius: 16px;
     padding: 20px 24px;
     margin-bottom: 20px;
-    border: 1px solid rgba(255,255,255,0.06);
+    box-shadow: 0 2px 12px var(--shadow);
   }
   .setup-row {
     display: flex;
@@ -77,26 +78,26 @@
   .setup-group textarea {
     width: 320px;
     height: 90px;
-    border: 2px solid rgba(255,255,255,0.1);
+    border: 2px solid #e8ddd0;
     border-radius: 10px;
     padding: 10px 12px;
     font-size: 0.9rem;
     font-family: inherit;
     color: var(--text);
-    background: var(--bg);
+    background: #fff;
     resize: vertical;
     line-height: 1.5;
   }
   .setup-group textarea:focus { outline: none; border-color: var(--amber); }
   .setup-group input[type="number"] {
     width: 70px;
-    border: 2px solid rgba(255,255,255,0.1);
+    border: 2px solid #e8ddd0;
     border-radius: 10px;
     padding: 8px 10px;
     font-size: 1rem;
     font-family: inherit;
     color: var(--text);
-    background: var(--bg);
+    background: #fff;
     text-align: center;
   }
   .setup-group input[type="number"]:focus { outline: none; border-color: var(--amber); }
@@ -129,27 +130,27 @@
   .btn:active { transform: scale(0.95); }
   .btn-primary {
     background: var(--amber);
-    color: #1a1a2e;
+    color: #fff;
   }
   .btn-primary:hover { background: var(--amber-light); }
   .btn-secondary {
     background: transparent;
     color: var(--text-dim);
-    border: 2px solid rgba(255,255,255,0.1);
+    border: 2px solid #e8ddd0;
   }
-  .btn-secondary:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+  .btn-secondary:hover { border-color: #d4a574; color: var(--text); }
   .btn-apply {
-    background: rgba(255,152,0,0.15);
-    color: var(--amber);
+    background: rgba(255,152,0,0.1);
+    color: var(--amber-dark);
     border: 2px solid rgba(255,152,0,0.3);
   }
-  .btn-apply:hover { background: rgba(255,152,0,0.25); }
+  .btn-apply:hover { background: rgba(255,152,0,0.18); }
 
   /* Classroom Area */
   .classroom { margin-top: 8px; }
   .podium {
     background: linear-gradient(135deg, var(--amber-dark), var(--amber));
-    color: #1a1a2e;
+    color: #fff;
     text-align: center;
     padding: 10px;
     border-radius: 12px;
@@ -168,7 +169,7 @@
   }
   .seat {
     background: var(--seat-bg);
-    border: 2px solid rgba(255,255,255,0.06);
+    border: 2px solid #e8ddd0;
     border-radius: 10px;
     min-height: 52px;
     display: flex;
@@ -182,17 +183,18 @@
     text-align: center;
     word-break: break-all;
     position: relative;
+    box-shadow: 0 1px 4px var(--shadow);
   }
-  .seat:hover { border-color: rgba(255,152,0,0.3); background: var(--seat-hover); }
+  .seat:hover { border-color: var(--amber-light); background: var(--seat-hover); }
   .seat.occupied {
     background: var(--seat-occupied);
-    border-color: rgba(255,152,0,0.4);
-    color: var(--amber-light);
+    border-color: var(--amber);
+    color: var(--amber-dark);
   }
   .seat.drag-over {
     border-color: var(--amber);
-    background: rgba(255,152,0,0.15);
-    box-shadow: 0 0 12px rgba(255,152,0,0.3);
+    background: rgba(255,152,0,0.12);
+    box-shadow: 0 0 12px rgba(255,152,0,0.25);
   }
   .seat .seat-number {
     position: absolute;
@@ -209,7 +211,7 @@
     background: var(--card);
     border-radius: 16px;
     padding: 16px 20px;
-    border: 1px solid rgba(255,255,255,0.06);
+    box-shadow: 0 2px 12px var(--shadow);
   }
   .unassigned-area h3 {
     font-size: 0.95rem;
@@ -223,8 +225,8 @@
     min-height: 40px;
   }
   .student-tag {
-    background: rgba(255,152,0,0.15);
-    color: var(--amber-light);
+    background: rgba(255,152,0,0.1);
+    color: var(--amber-dark);
     padding: 8px 14px;
     border-radius: 8px;
     font-size: 0.88rem;
@@ -234,8 +236,8 @@
     border: 2px solid transparent;
   }
   .student-tag:hover {
-    background: rgba(255,152,0,0.25);
-    border-color: rgba(255,152,0,0.4);
+    background: rgba(255,152,0,0.18);
+    border-color: var(--amber-light);
   }
   .student-tag.dragging {
     opacity: 0.4;
@@ -257,12 +259,12 @@
     pointer-events: none;
     z-index: 1000;
     background: var(--amber);
-    color: #1a1a2e;
+    color: #fff;
     padding: 8px 14px;
     border-radius: 8px;
     font-size: 0.88rem;
     font-weight: 700;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
     transform: translate(-50%, -50%);
   }
 

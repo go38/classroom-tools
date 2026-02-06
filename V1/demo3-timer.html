@@ -5,26 +5,29 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>課堂計時器</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1a1a2e">
+<meta name="theme-color" content="#faf3e8">
 <link rel="apple-touch-icon" href="icon.svg">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Outfit:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Lilita+One&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0a0a12;
-    --surface: #12121e;
-    --ring: #1e1e32;
+    --bg: #faf3e8;
+    --surface: #ffffff;
+    --shadow: rgba(120,90,50,0.08);
+    --ring: #e8ddd0;
     --accent: #6c63ff;
-    --accent-glow: rgba(108,99,255,0.25);
+    --accent-glow: rgba(108,99,255,0.2);
     --green: #2ecc71;
     --red: #e74c3c;
     --orange: #f39c12;
-    --text: #f0f0f5;
-    --text-dim: #5a5a78;
+    --text: #2d2419;
+    --text-dim: #9a8b73;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     font-family: 'Noto Sans TC', sans-serif;
     background: var(--bg);
+    background-image: radial-gradient(circle at 30% 20%, rgba(108,99,255,0.04) 0%, transparent 50%),
+                      radial-gradient(circle at 70% 80%, rgba(231,76,60,0.03) 0%, transparent 50%);
     color: var(--text);
     min-height: 100vh;
     display: flex;
@@ -40,12 +43,12 @@
     width: 500px; height: 500px;
     border-radius: 50%;
     filter: blur(120px);
-    opacity: 0.15;
+    opacity: 0.08;
     pointer-events: none;
     transition: background 1s;
   }
   .bg-glow-1 { top: -100px; left: -100px; background: var(--accent); }
-  .bg-glow-2 { bottom: -100px; right: -100px; background: #e74c3c; opacity: 0.08; }
+  .bg-glow-2 { bottom: -100px; right: -100px; background: #e74c3c; opacity: 0.04; }
 
   .app {
     position: relative;
@@ -55,13 +58,11 @@
   }
 
   h1 {
-    font-family: 'Outfit', sans-serif;
-    font-weight: 800;
+    font-family: 'Lilita One', 'Noto Sans TC', sans-serif;
     font-size: 1.6rem;
-    color: var(--text-dim);
+    color: var(--text);
     margin-bottom: 30px;
     letter-spacing: 2px;
-    text-transform: uppercase;
   }
 
   /* Timer Ring */
@@ -97,9 +98,8 @@
     text-align: center;
   }
   .time-text {
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Lilita One', sans-serif;
     font-size: 5rem;
-    font-weight: 900;
     letter-spacing: 4px;
     line-height: 1;
     transition: color 0.5s;
@@ -120,7 +120,7 @@
   }
   .preset {
     background: var(--surface);
-    border: 1px solid rgba(255,255,255,0.06);
+    border: 2px solid #e8ddd0;
     border-radius: 12px;
     padding: 10px 20px;
     color: var(--text);
@@ -129,14 +129,16 @@
     font-weight: 700;
     cursor: pointer;
     transition: all 0.2s;
+    box-shadow: 0 2px 8px var(--shadow);
   }
   .preset:hover {
     border-color: var(--accent);
-    background: rgba(108,99,255,0.1);
+    background: rgba(108,99,255,0.06);
   }
   .preset.active {
     background: var(--accent);
     border-color: var(--accent);
+    color: #fff;
   }
 
   /* Custom input */
@@ -150,12 +152,12 @@
   .custom-input input {
     width: 70px;
     background: var(--surface);
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 2px solid #e8ddd0;
     border-radius: 10px;
     color: var(--text);
     font-size: 1.3rem;
     font-weight: 700;
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Lilita One', sans-serif;
     text-align: center;
     padding: 8px;
   }
@@ -182,26 +184,27 @@
   }
   .ctrl-btn:active { transform: scale(0.9); }
   .btn-play {
-    background: linear-gradient(135deg, var(--accent), #8b5cf6);
+    background: var(--accent);
     color: #fff;
     box-shadow: 0 4px 24px var(--accent-glow);
     width: 80px;
     height: 80px;
     font-size: 2rem;
   }
-  .btn-play:hover { box-shadow: 0 6px 32px rgba(108,99,255,0.45); }
+  .btn-play:hover { box-shadow: 0 6px 32px rgba(108,99,255,0.4); }
   .btn-reset {
     background: var(--surface);
     color: var(--text-dim);
-    border: 1px solid rgba(255,255,255,0.08);
+    border: 2px solid #e8ddd0;
   }
-  .btn-reset:hover { color: var(--text); }
+  .btn-reset:hover { color: var(--text); border-color: #d4a574; }
   .btn-add {
     background: var(--surface);
     color: var(--orange);
-    border: 1px solid rgba(255,255,255,0.08);
+    border: 2px solid #e8ddd0;
     font-size: 1.2rem;
   }
+  .btn-add:hover { border-color: var(--orange); }
 
   /* Fullscreen overlay for time-up */
   .timeup-overlay {
@@ -223,9 +226,8 @@
     100% { opacity: 1; }
   }
   .timeup-text {
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Lilita One', sans-serif;
     font-size: 5rem;
-    font-weight: 900;
     color: #fff;
     margin-bottom: 20px;
     animation: pulse 0.6s infinite alternate;
@@ -254,7 +256,7 @@
     top: 16px;
     right: 16px;
     background: var(--surface);
-    border: 1px solid rgba(255,255,255,0.06);
+    border: 2px solid #e8ddd0;
     border-radius: 10px;
     padding: 8px 14px;
     color: var(--text-dim);
@@ -262,6 +264,7 @@
     font-size: 0.85rem;
     cursor: pointer;
     z-index: 10;
+    box-shadow: 0 2px 8px var(--shadow);
   }
 
   @media (max-width: 500px) {
@@ -280,7 +283,7 @@
 <button class="sound-toggle" id="soundToggle" onclick="toggleSound()">🔊 音效開</button>
 
 <div class="app">
-  <a href="index.html" style="display:inline-block;color:var(--text-dim);text-decoration:none;font-size:0.9rem;margin-bottom:12px;transition:color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--text-dim)'">← 返回首頁</a>
+  <a href="index.html" style="display:inline-block;color:var(--text-dim);text-decoration:none;font-size:0.9rem;margin-bottom:12px;transition:color 0.2s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-dim)'">← 返回首頁</a>
   <h1>⏱ 課堂計時器</h1>
 
   <div class="timer-container">

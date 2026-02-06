@@ -5,23 +5,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>課堂隨機抽籤器</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1a1a2e">
+<meta name="theme-color" content="#faf3e8">
 <link rel="apple-touch-icon" href="icon.svg">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Lilita+One&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #1a1a2e;
-    --card: #16213e;
-    --accent: #e94560;
-    --accent2: #0f3460;
-    --gold: #f5c518;
-    --text: #eaeaea;
-    --text-dim: #8892a4;
+    --bg: #faf3e8;
+    --card: #ffffff;
+    --shadow: rgba(120,90,50,0.08);
+    --accent: #e74c3c;
+    --text: #2d2419;
+    --text-dim: #9a8b73;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     font-family: 'Noto Sans TC', sans-serif;
     background: var(--bg);
+    background-image: radial-gradient(circle at 20% 20%, rgba(231,76,60,0.04) 0%, transparent 50%),
+                      radial-gradient(circle at 80% 80%, rgba(245,197,24,0.04) 0%, transparent 50%);
     color: var(--text);
     min-height: 100vh;
     overflow-x: hidden;
@@ -36,11 +37,10 @@
     margin-bottom: 30px;
   }
   header h1 {
-    font-family: 'Fredoka', 'Noto Sans TC', sans-serif;
+    font-family: 'Lilita One', 'Noto Sans TC', sans-serif;
     font-size: 2.4rem;
-    background: linear-gradient(135deg, var(--gold), var(--accent));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--text);
+    letter-spacing: 2px;
     margin-bottom: 6px;
   }
   header p { color: var(--text-dim); font-size: 0.95rem; }
@@ -50,7 +50,7 @@
     border-radius: 16px;
     padding: 24px;
     margin-bottom: 24px;
-    border: 1px solid rgba(255,255,255,0.06);
+    box-shadow: 0 2px 12px var(--shadow);
   }
   .input-section label {
     display: block;
@@ -61,8 +61,8 @@
   .input-section textarea {
     width: 100%;
     min-height: 100px;
-    background: rgba(0,0,0,0.3);
-    border: 1px solid rgba(255,255,255,0.1);
+    background: #fff;
+    border: 2px solid #e8ddd0;
     border-radius: 10px;
     color: var(--text);
     padding: 14px;
@@ -100,19 +100,21 @@
   }
   .btn:active { transform: scale(0.96); }
   .btn-primary {
-    background: linear-gradient(135deg, var(--accent), #c0392b);
+    background: var(--accent);
     color: #fff;
-    box-shadow: 0 4px 20px rgba(233,69,96,0.4);
+    box-shadow: 0 4px 20px rgba(231,76,60,0.3);
   }
-  .btn-primary:hover { box-shadow: 0 6px 28px rgba(233,69,96,0.55); }
+  .btn-primary:hover { box-shadow: 0 6px 28px rgba(231,76,60,0.45); }
   .btn-primary:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
   .btn-secondary {
-    background: var(--accent2);
-    color: var(--text);
+    background: transparent;
+    color: var(--text-dim);
+    border: 2px solid #e8ddd0;
   }
+  .btn-secondary:hover { border-color: #d4a574; color: var(--text); }
 
   .pick-count {
     display: flex;
@@ -125,16 +127,16 @@
   .pick-count input {
     width: 60px;
     text-align: center;
-    background: rgba(0,0,0,0.3);
-    border: 1px solid rgba(255,255,255,0.15);
+    background: #fff;
+    border: 2px solid #e8ddd0;
     border-radius: 8px;
-    color: var(--gold);
+    color: var(--accent);
     font-size: 1.2rem;
     font-weight: 700;
     padding: 6px;
     font-family: inherit;
   }
-  .pick-count input:focus { outline: none; border-color: var(--gold); }
+  .pick-count input:focus { outline: none; border-color: var(--accent); }
 
   /* Slot machine style result */
   .result-area {
@@ -146,11 +148,10 @@
     margin-bottom: 20px;
   }
   .slot {
-    font-family: 'Fredoka', sans-serif;
+    font-family: 'Lilita One', sans-serif;
     font-size: 3.5rem;
     font-weight: 700;
-    color: var(--gold);
-    text-shadow: 0 0 30px rgba(245,197,24,0.4);
+    color: var(--accent);
     min-height: 80px;
     display: flex;
     align-items: center;
@@ -173,14 +174,14 @@
     margin-top: 12px;
   }
   .result-tag {
-    background: linear-gradient(135deg, var(--accent), #c0392b);
+    background: var(--accent);
     color: #fff;
     padding: 10px 22px;
     border-radius: 30px;
     font-size: 1.15rem;
     font-weight: 700;
     animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
-    box-shadow: 0 4px 15px rgba(233,69,96,0.3);
+    box-shadow: 0 4px 15px rgba(231,76,60,0.25);
   }
   @keyframes popIn {
     0% { transform: scale(0); opacity: 0; }
@@ -196,7 +197,7 @@
     margin-top: 16px;
   }
   .pool-tag {
-    background: rgba(255,255,255,0.07);
+    background: rgba(0,0,0,0.04);
     padding: 6px 14px;
     border-radius: 20px;
     font-size: 0.88rem;
@@ -205,7 +206,7 @@
     border: 1px solid transparent;
   }
   .pool-tag.picked {
-    background: rgba(233,69,96,0.2);
+    background: rgba(231,76,60,0.1);
     color: var(--accent);
     border-color: var(--accent);
     text-decoration: line-through;
@@ -215,7 +216,7 @@
     background: var(--card);
     border-radius: 16px;
     padding: 20px 24px;
-    border: 1px solid rgba(255,255,255,0.06);
+    box-shadow: 0 2px 12px var(--shadow);
     margin-top: 24px;
   }
   .history h3 {
@@ -225,14 +226,14 @@
   }
   .history-item {
     padding: 8px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
+    border-bottom: 1px solid #f0e6d6;
     font-size: 0.92rem;
     display: flex;
     justify-content: space-between;
   }
   .history-item:last-child { border-bottom: none; }
   .history-round { color: var(--text-dim); }
-  .history-names { color: var(--gold); font-weight: 700; }
+  .history-names { color: var(--accent); font-weight: 700; }
 
   .confetti-container {
     position: fixed;
@@ -262,7 +263,7 @@
 <body>
 
 <div class="container">
-  <a href="index.html" style="display:inline-block;color:var(--text-dim);text-decoration:none;font-size:0.9rem;margin-bottom:12px;transition:color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--text-dim)'">← 返回首頁</a>
+  <a href="index.html" style="display:inline-block;color:var(--text-dim);text-decoration:none;font-size:0.9rem;margin-bottom:12px;transition:color 0.2s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-dim)'">← 返回首頁</a>
   <header>
     <h1>🎰 課堂隨機抽籤器</h1>
     <p>輸入學生名單，點擊抽籤，讓命運來決定！</p>

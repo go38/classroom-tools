@@ -1,0 +1,28 @@
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment
+.env
+.env.local
+
+# Logs
+*.log
+
+# Dependencies
+node_modules/
+__pycache__/
+venv/
+
+# Build
+dist/
+build/
+*.exe
+*.dll

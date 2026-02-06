@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>課堂計時器</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Outfit:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a12;
+    --surface: #12121e;
+    --ring: #1e1e32;
+    --accent: #6c63ff;
+    --accent-glow: rgba(108,99,255,0.25);
+    --green: #2ecc71;
+    --red: #e74c3c;
+    --orange: #f39c12;
+    --text: #f0f0f5;
+    --text-dim: #5a5a78;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  .bg-glow {
+    position: fixed;
+    width: 500px; height: 500px;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0.15;
+    pointer-events: none;
+    transition: background 1s;
+  }
+  .bg-glow-1 { top: -100px; left: -100px; background: var(--accent); }
+  .bg-glow-2 { bottom: -100px; right: -100px; background: #e74c3c; opacity: 0.08; }
+
+  .app {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 20px;
+  }
+
+  h1 {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: 1.6rem;
+    color: var(--text-dim);
+    margin-bottom: 30px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* Timer Ring */
+  .timer-container {
+    position: relative;
+    width: 340px;
+    height: 340px;
+    margin: 0 auto 36px;
+  }
+  .timer-svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+  }
+  .ring-bg {
+    fill: none;
+    stroke: var(--ring);
+    stroke-width: 8;
+  }
+  .ring-progress {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 8;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.3s ease, stroke 0.5s;
+    filter: drop-shadow(0 0 8px var(--accent-glow));
+  }
+  .timer-display {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+  .time-text {
+    font-family: 'Outfit', sans-serif;
+    font-size: 5rem;
+    font-weight: 900;
+    letter-spacing: 4px;
+    line-height: 1;
+    transition: color 0.5s;
+  }
+  .time-label {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    margin-top: 6px;
+  }
+
+  /* Presets */
+  .presets {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+  .preset {
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 10px 20px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .preset:hover {
+    border-color: var(--accent);
+    background: rgba(108,99,255,0.1);
+  }
+  .preset.active {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  /* Custom input */
+  .custom-input {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 28px;
+  }
+  .custom-input input {
+    width: 70px;
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    color: var(--text);
+    font-size: 1.3rem;
+    font-weight: 700;
+    font-family: 'Outfit', sans-serif;
+    text-align: center;
+    padding: 8px;
+  }
+  .custom-input input:focus { outline: none; border-color: var(--accent); }
+  .custom-input span { color: var(--text-dim); font-size: 0.85rem; }
+
+  /* Controls */
+  .controls {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+  }
+  .ctrl-btn {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: none;
+    font-size: 1.6rem;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .ctrl-btn:active { transform: scale(0.9); }
+  .btn-play {
+    background: linear-gradient(135deg, var(--accent), #8b5cf6);
+    color: #fff;
+    box-shadow: 0 4px 24px var(--accent-glow);
+    width: 80px;
+    height: 80px;
+    font-size: 2rem;
+  }
+  .btn-play:hover { box-shadow: 0 6px 32px rgba(108,99,255,0.45); }
+  .btn-reset {
+    background: var(--surface);
+    color: var(--text-dim);
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .btn-reset:hover { color: var(--text); }
+  .btn-add {
+    background: var(--surface);
+    color: var(--orange);
+    border: 1px solid rgba(255,255,255,0.08);
+    font-size: 1.2rem;
+  }
+
+  /* Fullscreen overlay for time-up */
+  .timeup-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(231,76,60,0.92);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    animation: flashIn 0.3s;
+  }
+  .timeup-overlay.show {
+    display: flex;
+  }
+  @keyframes flashIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+  .timeup-text {
+    font-family: 'Outfit', sans-serif;
+    font-size: 5rem;
+    font-weight: 900;
+    color: #fff;
+    margin-bottom: 20px;
+    animation: pulse 0.6s infinite alternate;
+  }
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.05); }
+  }
+  .timeup-dismiss {
+    background: rgba(255,255,255,0.2);
+    border: 2px solid #fff;
+    border-radius: 14px;
+    padding: 14px 40px;
+    color: #fff;
+    font-size: 1.2rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .timeup-dismiss:hover { background: rgba(255,255,255,0.3); }
+
+  /* Sound toggle */
+  .sound-toggle {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px;
+    padding: 8px 14px;
+    color: var(--text-dim);
+    font-family: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    z-index: 10;
+  }
+
+  @media (max-width: 500px) {
+    .timer-container { width: 260px; height: 260px; }
+    .time-text { font-size: 3.5rem; }
+    h1 { font-size: 1.2rem; }
+    .timeup-text { font-size: 3rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-glow bg-glow-1"></div>
+<div class="bg-glow bg-glow-2"></div>
+
+<button class="sound-toggle" id="soundToggle" onclick="toggleSound()">🔊 音效開</button>
+
+<div class="app">
+  <h1>⏱ 課堂計時器</h1>
+
+  <div class="timer-container">
+    <svg class="timer-svg" viewBox="0 0 200 200">
+      <circle class="ring-bg" cx="100" cy="100" r="90"/>
+      <circle class="ring-progress" id="ring" cx="100" cy="100" r="90"
+        stroke-dasharray="565.48" stroke-dashoffset="0"/>
+    </svg>
+    <div class="timer-display">
+      <div class="time-text" id="timeText">05:00</div>
+      <div class="time-label" id="timeLabel">準備開始</div>
+    </div>
+  </div>
+
+  <div class="presets">
+    <button class="preset" onclick="setTime(60)">1 分鐘</button>
+    <button class="preset" onclick="setTime(180)">3 分鐘</button>
+    <button class="preset active" onclick="setTime(300)">5 分鐘</button>
+    <button class="preset" onclick="setTime(600)">10 分鐘</button>
+    <button class="preset" onclick="setTime(900)">15 分鐘</button>
+  </div>
+
+  <div class="custom-input">
+    <input type="number" id="customMin" value="5" min="0" max="99" onchange="applyCustom()">
+    <span>分</span>
+    <input type="number" id="customSec" value="0" min="0" max="59" onchange="applyCustom()">
+    <span>秒</span>
+  </div>
+
+  <div class="controls">
+    <button class="ctrl-btn btn-reset" onclick="resetTimer()" title="重置">↺</button>
+    <button class="ctrl-btn btn-play" id="playBtn" onclick="toggleTimer()">▶</button>
+    <button class="ctrl-btn btn-add" onclick="addTime(60)" title="+1 分鐘">+1</button>
+  </div>
+</div>
+
+<div class="timeup-overlay" id="timeupOverlay">
+  <div class="timeup-text">⏰ 時間到！</div>
+  <button class="timeup-dismiss" onclick="dismissTimeup()">知道了</button>
+</div>
+
+<script>
+  let totalSeconds = 300;
+  let remainSeconds = 300;
+  let interval = null;
+  let running = false;
+  let soundEnabled = true;
+
+  const circumference = 2 * Math.PI * 90; // ~565.48
+
+  // Audio context for beep
+  let audioCtx = null;
+  function beep(freq = 880, duration = 0.15, vol = 0.3) {
+    if (!soundEnabled) return;
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.frequency.value = freq;
+    gain.gain.value = vol;
+    osc.start();
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+    osc.stop(audioCtx.currentTime + duration);
+  }
+  function alarmSound() {
+    if (!soundEnabled) return;
+    for (let i = 0; i < 6; i++) {
+      setTimeout(() => beep(i % 2 === 0 ? 880 : 660, 0.2, 0.5), i * 250);
+    }
+  }
+
+  function toggleSound() {
+    soundEnabled = !soundEnabled;
+    document.getElementById('soundToggle').textContent = soundEnabled ? '🔊 音效開' : '🔇 音效關';
+  }
+
+  function updateDisplay() {
+    const min = Math.floor(remainSeconds / 60);
+    const sec = remainSeconds % 60;
+    document.getElementById('timeText').textContent =
+      String(min).padStart(2, '0') + ':' + String(sec).padStart(2, '0');
+
+    // Ring progress
+    const pct = totalSeconds > 0 ? remainSeconds / totalSeconds : 0;
+    const offset = circumference * (1 - pct);
+    const ring = document.getElementById('ring');
+    ring.style.strokeDashoffset = offset;
+
+    // Color based on remaining time
+    const timeText = document.getElementById('timeText');
+    if (pct > 0.3) {
+      ring.style.stroke = 'var(--accent)';
+      timeText.style.color = 'var(--text)';
+    } else if (pct > 0.1) {
+      ring.style.stroke = 'var(--orange)';
+      timeText.style.color = 'var(--orange)';
+    } else {
+      ring.style.stroke = 'var(--red)';
+      timeText.style.color = 'var(--red)';
+    }
+
+    // Label
+    const label = document.getElementById('timeLabel');
+    if (!running && remainSeconds === totalSeconds) label.textContent = '準備開始';
+    else if (running) label.textContent = '計時中…';
+    else if (remainSeconds === 0) label.textContent = '時間到！';
+    else label.textContent = '已暫停';
+  }
+
+  function toggleTimer() {
+    if (remainSeconds === 0) return;
+    running = !running;
+    document.getElementById('playBtn').textContent = running ? '⏸' : '▶';
+
+    if (running) {
+      interval = setInterval(() => {
+        remainSeconds--;
+        if (remainSeconds <= 3 && remainSeconds > 0) beep(660, 0.1);
+        if (remainSeconds <= 0) {
+          remainSeconds = 0;
+          running = false;
+          clearInterval(interval);
+          document.getElementById('playBtn').textContent = '▶';
+          alarmSound();
+          document.getElementById('timeupOverlay').classList.add('show');
+        }
+        updateDisplay();
+      }, 1000);
+    } else {
+      clearInterval(interval);
+    }
+    updateDisplay();
+  }
+
+  function setTime(seconds) {
+    clearInterval(interval);
+    running = false;
+    totalSeconds = seconds;
+    remainSeconds = seconds;
+    document.getElementById('playBtn').textContent = '▶';
+    document.getElementById('customMin').value = Math.floor(seconds / 60);
+    document.getElementById('customSec').value = seconds % 60;
+
+    document.querySelectorAll('.preset').forEach(p => p.classList.remove('active'));
+    event.target.classList.add('active');
+    updateDisplay();
+  }
+
+  function applyCustom() {
+    const min = parseInt(document.getElementById('customMin').value) || 0;
+    const sec = parseInt(document.getElementById('customSec').value) || 0;
+    const total = min * 60 + sec;
+    if (total > 0) {
+      clearInterval(interval);
+      running = false;
+      totalSeconds = total;
+      remainSeconds = total;
+      document.getElementById('playBtn').textContent = '▶';
+      document.querySelectorAll('.preset').forEach(p => p.classList.remove('active'));
+      updateDisplay();
+    }
+  }
+
+  function resetTimer() {
+    clearInterval(interval);
+    running = false;
+    remainSeconds = totalSeconds;
+    document.getElementById('playBtn').textContent = '▶';
+    updateDisplay();
+  }
+
+  function addTime(sec) {
+    remainSeconds += sec;
+    totalSeconds += sec;
+    updateDisplay();
+  }
+
+  function dismissTimeup() {
+    document.getElementById('timeupOverlay').classList.remove('show');
+    resetTimer();
+  }
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', e => {
+    if (e.code === 'Space') { e.preventDefault(); toggleTimer(); }
+    if (e.code === 'KeyR') resetTimer();
+  });
+
+  updateDisplay();
+</script>
+</body>
+</html>

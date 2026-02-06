@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>課堂問答挑戰</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0e1a;
+    --card: #141829;
+    --green: #00e676;
+    --red: #ff5252;
+    --blue: #448aff;
+    --purple: #7c4dff;
+    --orange: #ffab40;
+    --yellow: #ffd740;
+    --text: #f0f0f0;
+    --text-dim: #6b7394;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  .app { max-width: 750px; margin: 0 auto; padding: 24px 18px; }
+
+  /* === SETUP SCREEN === */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  .setup-header {
+    text-align: center;
+    margin-bottom: 32px;
+    padding-top: 20px;
+  }
+  .setup-header h1 {
+    font-family: 'Baloo 2', 'Noto Sans TC', sans-serif;
+    font-size: 2.6rem;
+    background: linear-gradient(135deg, var(--yellow), var(--orange), var(--red));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .setup-header p { color: var(--text-dim); margin-top: 6px; }
+
+  .setup-card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+  .setup-card h3 { margin-bottom: 14px; font-size: 1.05rem; }
+  .setup-card textarea {
+    width: 100%;
+    min-height: 220px;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    color: var(--text);
+    padding: 14px;
+    font-size: 0.92rem;
+    font-family: 'Noto Sans TC', monospace;
+    resize: vertical;
+    line-height: 1.6;
+  }
+  .setup-card textarea:focus { outline: none; border-color: var(--blue); }
+  .hint { color: var(--text-dim); font-size: 0.8rem; margin-top: 8px; line-height: 1.5; }
+
+  .btn {
+    font-family: inherit;
+    font-weight: 700;
+    border: none;
+    border-radius: 12px;
+    padding: 14px 36px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: transform 0.12s, box-shadow 0.2s;
+  }
+  .btn:active { transform: scale(0.96); }
+  .btn-start {
+    background: linear-gradient(135deg, var(--blue), var(--purple));
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(68,138,255,0.35);
+    display: block;
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  /* === QUIZ SCREEN === */
+  .quiz-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .progress-text { color: var(--text-dim); font-size: 0.9rem; }
+  .score-display {
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 1.4rem;
+    color: var(--yellow);
+  }
+  .progress-bar {
+    width: 100%;
+    height: 6px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 3px;
+    margin-bottom: 28px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--blue), var(--purple));
+    border-radius: 3px;
+    transition: width 0.4s ease;
+  }
+
+  .timer-bar {
+    width: 100%;
+    height: 4px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 2px;
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+  .timer-fill {
+    height: 100%;
+    background: var(--green);
+    border-radius: 2px;
+    transition: width 0.1s linear, background 0.3s;
+    width: 100%;
+  }
+  .timer-fill.warning { background: var(--orange); }
+  .timer-fill.danger { background: var(--red); }
+
+  .question-card {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 32px 28px;
+    margin-bottom: 24px;
+    border: 1px solid rgba(255,255,255,0.06);
+    text-align: center;
+  }
+  .question-text {
+    font-size: 1.45rem;
+    font-weight: 700;
+    line-height: 1.5;
+  }
+
+  .options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .option-btn {
+    background: var(--card);
+    border: 2px solid rgba(255,255,255,0.1);
+    border-radius: 14px;
+    padding: 18px 16px;
+    color: var(--text);
+    font-size: 1.05rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .option-btn:hover:not(.disabled) {
+    border-color: var(--blue);
+    background: rgba(68,138,255,0.08);
+    transform: translateY(-2px);
+  }
+  .option-btn .label {
+    position: absolute;
+    top: 8px;
+    left: 12px;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    font-weight: 400;
+  }
+  .option-btn.correct {
+    border-color: var(--green);
+    background: rgba(0,230,118,0.12);
+    color: var(--green);
+  }
+  .option-btn.wrong {
+    border-color: var(--red);
+    background: rgba(255,82,82,0.1);
+    color: var(--red);
+  }
+  .option-btn.disabled { pointer-events: none; }
+  .option-btn.dim { opacity: 0.4; }
+
+  .feedback {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    min-height: 40px;
+  }
+  .feedback.correct-fb { color: var(--green); }
+  .feedback.wrong-fb { color: var(--red); }
+
+  /* === RESULT SCREEN === */
+  .result-center { text-align: center; padding-top: 40px; }
+  .result-emoji { font-size: 5rem; margin-bottom: 16px; }
+  .result-title {
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 2.2rem;
+    margin-bottom: 8px;
+  }
+  .result-score {
+    font-size: 3.5rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--yellow), var(--orange));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 16px 0;
+  }
+  .result-detail { color: var(--text-dim); font-size: 1rem; margin-bottom: 30px; }
+  .result-bars { max-width: 400px; margin: 0 auto 30px; }
+  .result-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+    font-size: 0.92rem;
+  }
+  .result-bar-label { width: 50px; text-align: right; color: var(--text-dim); }
+  .result-bar-track {
+    flex: 1;
+    height: 10px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  .result-bar-fill {
+    height: 100%;
+    border-radius: 5px;
+    transition: width 1s ease;
+  }
+
+  .btn-again {
+    background: linear-gradient(135deg, var(--purple), var(--blue));
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(124,77,255,0.3);
+  }
+
+  @media (max-width: 550px) {
+    .options { grid-template-columns: 1fr; }
+    .question-text { font-size: 1.2rem; }
+    .setup-header h1 { font-size: 2rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- SETUP -->
+  <div class="screen active" id="setupScreen">
+    <div class="setup-header">
+      <h1>🧠 課堂問答挑戰</h1>
+      <p>自訂題目，即時挑戰！</p>
+    </div>
+    <div class="setup-card">
+      <h3>📝 輸入題目（JSON 格式）</h3>
+      <textarea id="quizInput">[
+  {
+    "q": "台灣最高的山是哪一座？",
+    "options": ["阿里山", "玉山", "雪山", "合歡山"],
+    "answer": 1
+  },
+  {
+    "q": "水的化學式是什麼？",
+    "options": ["CO2", "H2O", "O2", "NaCl"],
+    "answer": 1
+  },
+  {
+    "q": "「三國演義」的作者是誰？",
+    "options": ["曹雪芹", "吳承恩", "施耐庵", "羅貫中"],
+    "answer": 3
+  },
+  {
+    "q": "光的三原色是？",
+    "options": ["紅、黃、藍", "紅、綠、藍", "紅、綠、黃", "紅、藍、紫"],
+    "answer": 1
+  },
+  {
+    "q": "1 公里等於幾公尺？",
+    "options": ["100", "500", "1000", "10000"],
+    "answer": 2
+  }
+]</textarea>
+      <div class="hint">answer 值為選項索引（從 0 開始）。你可以請 AI 幫你產生任何科目的題目！</div>
+    </div>
+    <button class="btn btn-start" onclick="startQuiz()">🚀 開始挑戰</button>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="screen" id="quizScreen">
+    <div class="quiz-top">
+      <span class="progress-text" id="progressText">第 1 / 5 題</span>
+      <span class="score-display" id="scoreDisplay">⭐ 0</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="timer-bar"><div class="timer-fill" id="timerFill"></div></div>
+    <div class="question-card">
+      <div class="question-text" id="questionText"></div>
+    </div>
+    <div class="options" id="optionsContainer"></div>
+    <div class="feedback" id="feedback"></div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="screen" id="resultScreen">
+    <div class="result-center">
+      <div class="result-emoji" id="resultEmoji"></div>
+      <div class="result-title" id="resultTitle"></div>
+      <div class="result-score" id="resultScore"></div>
+      <div class="result-detail" id="resultDetail"></div>
+      <div class="result-bars" id="resultBars"></div>
+      <button class="btn btn-again" onclick="goSetup()">🔁 再玩一次</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let questions = [];
+  let current = 0;
+  let score = 0;
+  let timer = null;
+  let timeLeft = 0;
+  const TIME_LIMIT = 15; // seconds per question
+
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function startQuiz() {
+    try {
+      questions = JSON.parse(document.getElementById('quizInput').value);
+      if (!Array.isArray(questions) || questions.length === 0) throw new Error();
+    } catch {
+      alert('題目格式有誤，請檢查 JSON 格式！');
+      return;
+    }
+    current = 0;
+    score = 0;
+    showScreen('quizScreen');
+    showQuestion();
+  }
+
+  function showQuestion() {
+    const q = questions[current];
+    const labels = ['A', 'B', 'C', 'D'];
+    document.getElementById('progressText').textContent = `第 ${current + 1} / ${questions.length} 題`;
+    document.getElementById('scoreDisplay').textContent = `⭐ ${score}`;
+    document.getElementById('progressFill').style.width = `${((current) / questions.length) * 100}%`;
+    document.getElementById('questionText').textContent = q.q;
+    document.getElementById('feedback').textContent = '';
+    document.getElementById('feedback').className = 'feedback';
+
+    const container = document.getElementById('optionsContainer');
+    container.innerHTML = '';
+    q.options.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.innerHTML = `<span class="label">${labels[i]}</span>${opt}`;
+      btn.onclick = () => selectAnswer(i);
+      container.appendChild(btn);
+    });
+
+    // Start timer
+    timeLeft = TIME_LIMIT;
+    const timerFill = document.getElementById('timerFill');
+    timerFill.style.width = '100%';
+    timerFill.className = 'timer-fill';
+    clearInterval(timer);
+    timer = setInterval(() => {
+      timeLeft -= 0.1;
+      const pct = (timeLeft / TIME_LIMIT) * 100;
+      timerFill.style.width = pct + '%';
+      if (pct < 30) timerFill.className = 'timer-fill danger';
+      else if (pct < 60) timerFill.className = 'timer-fill warning';
+
+      if (timeLeft <= 0) {
+        clearInterval(timer);
+        selectAnswer(-1); // timeout
+      }
+    }, 100);
+  }
+
+  function selectAnswer(idx) {
+    clearInterval(timer);
+    const q = questions[current];
+    const btns = document.querySelectorAll('.option-btn');
+    const feedback = document.getElementById('feedback');
+
+    btns.forEach((b, i) => {
+      b.classList.add('disabled');
+      if (i === q.answer) b.classList.add('correct');
+      if (i === idx && idx !== q.answer) b.classList.add('wrong');
+      if (i !== q.answer && i !== idx) b.classList.add('dim');
+    });
+
+    if (idx === q.answer) {
+      score++;
+      feedback.textContent = '✅ 答對了！太厲害了！';
+      feedback.className = 'feedback correct-fb';
+      document.getElementById('scoreDisplay').textContent = `⭐ ${score}`;
+    } else if (idx === -1) {
+      feedback.textContent = `⏰ 時間到！正確答案是「${q.options[q.answer]}」`;
+      feedback.className = 'feedback wrong-fb';
+    } else {
+      feedback.textContent = `❌ 可惜！正確答案是「${q.options[q.answer]}」`;
+      feedback.className = 'feedback wrong-fb';
+    }
+
+    setTimeout(() => {
+      current++;
+      if (current < questions.length) {
+        showQuestion();
+      } else {
+        showResult();
+      }
+    }, 2000);
+  }
+
+  function showResult() {
+    showScreen('resultScreen');
+    const pct = Math.round((score / questions.length) * 100);
+    let emoji, title;
+    if (pct === 100) { emoji = '🏆'; title = '完美滿分！'; }
+    else if (pct >= 80) { emoji = '🌟'; title = '非常優秀！'; }
+    else if (pct >= 60) { emoji = '👍'; title = '表現不錯！'; }
+    else if (pct >= 40) { emoji = '💪'; title = '繼續加油！'; }
+    else { emoji = '📚'; title = '再複習一下吧！'; }
+
+    document.getElementById('resultEmoji').textContent = emoji;
+    document.getElementById('resultTitle').textContent = title;
+    document.getElementById('resultScore').textContent = `${score} / ${questions.length}`;
+    document.getElementById('resultDetail').textContent = `正確率 ${pct}%`;
+
+    const bars = document.getElementById('resultBars');
+    bars.innerHTML = `
+      <div class="result-bar-row">
+        <span class="result-bar-label" style="color:var(--green)">答對</span>
+        <div class="result-bar-track">
+          <div class="result-bar-fill" style="width:0%;background:var(--green);" id="correctBar"></div>
+        </div>
+        <span>${score}</span>
+      </div>
+      <div class="result-bar-row">
+        <span class="result-bar-label" style="color:var(--red)">答錯</span>
+        <div class="result-bar-track">
+          <div class="result-bar-fill" style="width:0%;background:var(--red);" id="wrongBar"></div>
+        </div>
+        <span>${questions.length - score}</span>
+      </div>
+    `;
+    setTimeout(() => {
+      document.getElementById('correctBar').style.width = `${(score/questions.length)*100}%`;
+      document.getElementById('wrongBar').style.width = `${((questions.length-score)/questions.length)*100}%`;
+    }, 100);
+  }
+
+  function goSetup() {
+    showScreen('setupScreen');
+  }
+</script>
+</body>
+</html>

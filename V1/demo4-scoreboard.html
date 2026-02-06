@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>課堂記分板</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Lilita+One&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #faf3e8;
+    --card: #ffffff;
+    --shadow: rgba(120,90,50,0.08);
+    --text: #2d2419;
+    --text-dim: #9a8b73;
+    --team-colors: #e74c3c, #3498db, #2ecc71, #f39c12, #9b59b6, #1abc9c, #e67e22, #e84393;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: var(--bg);
+    background-image: radial-gradient(circle at 20% 20%, rgba(231,76,60,0.04) 0%, transparent 50%),
+                      radial-gradient(circle at 80% 80%, rgba(52,152,219,0.04) 0%, transparent 50%);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 20px;
+  }
+  .app { max-width: 900px; margin: 0 auto; }
+
+  header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  header h1 {
+    font-family: 'Lilita One', 'Noto Sans TC', sans-serif;
+    font-size: 2.8rem;
+    color: var(--text);
+    letter-spacing: 2px;
+  }
+  header p { color: var(--text-dim); font-size: 0.95rem; }
+
+  .setup-bar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 28px;
+    background: var(--card);
+    padding: 16px 20px;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px var(--shadow);
+  }
+  .setup-bar input {
+    border: 2px solid #e8ddd0;
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-size: 1rem;
+    font-family: inherit;
+    color: var(--text);
+    width: 160px;
+  }
+  .setup-bar input:focus { outline: none; border-color: #d4a574; }
+  .setup-bar button {
+    font-family: inherit;
+    font-weight: 700;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: transform 0.12s;
+  }
+  .setup-bar button:active { transform: scale(0.95); }
+  .btn-add-team {
+    background: var(--text);
+    color: var(--bg);
+  }
+  .btn-reset-all {
+    background: transparent;
+    color: var(--text-dim);
+    border: 2px solid #e8ddd0 !important;
+  }
+
+  .teams-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 18px;
+  }
+
+  .team-card {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 24px 18px;
+    text-align: center;
+    box-shadow: 0 4px 16px var(--shadow);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s;
+  }
+  .team-card:hover { transform: translateY(-3px); }
+
+  .team-card .color-bar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 6px;
+  }
+  .team-card .rank-badge {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    font-size: 1.4rem;
+  }
+  .team-card .remove-btn {
+    position: absolute;
+    top: 10px;
+    left: 12px;
+    background: none;
+    border: none;
+    color: #ccc;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: color 0.2s;
+  }
+  .team-card .remove-btn:hover { color: var(--text); }
+
+  .team-name {
+    font-family: 'Lilita One', sans-serif;
+    font-size: 1.15rem;
+    margin: 10px 0 8px;
+    letter-spacing: 1px;
+  }
+  .team-score {
+    font-family: 'Lilita One', sans-serif;
+    font-size: 3.8rem;
+    line-height: 1;
+    margin: 8px 0 18px;
+    transition: transform 0.15s;
+  }
+  .team-score.bump { animation: scoreBump 0.3s; }
+  @keyframes scoreBump {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+  }
+
+  .score-controls {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .score-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    border: 2px solid #eee;
+    background: #fff;
+    font-size: 1.1rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .score-btn:active { transform: scale(0.9); }
+  .score-btn.plus { color: #27ae60; border-color: #d5f5e3; }
+  .score-btn.plus:hover { background: #d5f5e3; }
+  .score-btn.minus { color: #e74c3c; border-color: #fadbd8; }
+  .score-btn.minus:hover { background: #fadbd8; }
+
+  .firework {
+    position: fixed;
+    pointer-events: none;
+    z-index: 999;
+  }
+  .spark {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    animation: sparkFly 0.6s ease-out forwards;
+  }
+  @keyframes sparkFly {
+    0% { transform: translate(0,0) scale(1); opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-dim);
+  }
+  .empty-state .emoji { font-size: 3rem; margin-bottom: 12px; }
+
+  @media (max-width: 500px) {
+    header h1 { font-size: 2rem; }
+    .teams-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+    .team-score { font-size: 2.8rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header>
+    <h1>🏅 課堂記分板</h1>
+    <p>為小組加分，激勵課堂參與！</p>
+  </header>
+
+  <div class="setup-bar">
+    <input type="text" id="teamNameInput" placeholder="輸入小組名稱…" maxlength="10"
+      onkeydown="if(event.key==='Enter') addTeam()">
+    <button class="btn-add-team" onclick="addTeam()">＋ 新增小組</button>
+    <button class="btn-reset-all" onclick="resetScores()">歸零</button>
+    <button class="btn-reset-all" onclick="clearAll()">全部清除</button>
+  </div>
+
+  <div class="teams-grid" id="teamsGrid">
+    <div class="empty-state" id="emptyState">
+      <div class="emoji">👆</div>
+      <div>輸入小組名稱來開始吧！</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const COLORS = ['#e74c3c','#3498db','#2ecc71','#f39c12','#9b59b6','#1abc9c','#e67e22','#e84393'];
+  const RANKS = ['🥇','🥈','🥉'];
+  let teams = [];
+
+  function addTeam() {
+    const input = document.getElementById('teamNameInput');
+    const name = input.value.trim();
+    if (!name) return;
+    if (teams.length >= 8) { alert('最多 8 組！'); return; }
+
+    teams.push({ name, score: 0, color: COLORS[teams.length % COLORS.length] });
+    input.value = '';
+    render();
+  }
+
+  function removeTeam(idx) {
+    teams.splice(idx, 1);
+    render();
+  }
+
+  function changeScore(idx, delta) {
+    teams[idx].score += delta;
+    render();
+
+    // Animate score bump
+    const el = document.querySelector(`.team-card[data-idx="${idx}"] .team-score`);
+    if (el) {
+      el.classList.remove('bump');
+      void el.offsetWidth; // reflow
+      el.classList.add('bump');
+    }
+
+    // Sparks on +
+    if (delta > 0) {
+      const card = document.querySelector(`.team-card[data-idx="${idx}"]`);
+      if (card) firework(card);
+    }
+  }
+
+  function resetScores() {
+    teams.forEach(t => t.score = 0);
+    render();
+  }
+
+  function clearAll() {
+    teams = [];
+    render();
+  }
+
+  function getRanks() {
+    const sorted = [...teams].sort((a, b) => b.score - a.score);
+    const rankMap = {};
+    let rank = 0, prev = null;
+    sorted.forEach((t, i) => {
+      if (t.score !== prev) rank = i;
+      prev = t.score;
+      rankMap[t.name] = rank;
+    });
+    return rankMap;
+  }
+
+  function render() {
+    const grid = document.getElementById('teamsGrid');
+    const empty = document.getElementById('emptyState');
+
+    if (teams.length === 0) {
+      grid.innerHTML = '';
+      grid.appendChild(empty);
+      empty.style.display = 'block';
+      return;
+    }
+
+    const ranks = getRanks();
+    grid.innerHTML = teams.map((t, i) => {
+      const rank = ranks[t.name];
+      const badge = rank < 3 && teams.length > 1 ? RANKS[rank] : '';
+      return `
+        <div class="team-card" data-idx="${i}">
+          <div class="color-bar" style="background:${t.color}"></div>
+          <button class="remove-btn" onclick="removeTeam(${i})" title="移除">✕</button>
+          <span class="rank-badge">${badge}</span>
+          <div class="team-name" style="color:${t.color}">${t.name}</div>
+          <div class="team-score" style="color:${t.color}">${t.score}</div>
+          <div class="score-controls">
+            <button class="score-btn minus" onclick="changeScore(${i},-5)">-5</button>
+            <button class="score-btn minus" onclick="changeScore(${i},-1)">-1</button>
+            <button class="score-btn plus" onclick="changeScore(${i},1)">+1</button>
+            <button class="score-btn plus" onclick="changeScore(${i},5)">+5</button>
+            <button class="score-btn plus" onclick="changeScore(${i},10)">+10</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function firework(el) {
+    const rect = el.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 3;
+    const container = document.createElement('div');
+    container.className = 'firework';
+    container.style.left = cx + 'px';
+    container.style.top = cy + 'px';
+    const colors = ['#f39c12','#e74c3c','#2ecc71','#3498db','#9b59b6'];
+    for (let i = 0; i < 12; i++) {
+      const spark = document.createElement('div');
+      spark.className = 'spark';
+      const angle = (i / 12) * Math.PI * 2;
+      const dist = 30 + Math.random() * 30;
+      spark.style.background = colors[Math.floor(Math.random() * colors.length)];
+      spark.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+      spark.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
+      spark.style.animation = `sparkFly 0.5s ease-out forwards`;
+      spark.style.left = '0px';
+      spark.style.top = '0px';
+      // Use custom end position
+      spark.animate([
+        { transform: 'translate(0,0) scale(1)', opacity: 1 },
+        { transform: `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px) scale(0)`, opacity: 0 }
+      ], { duration: 500, easing: 'ease-out' });
+      container.appendChild(spark);
+    }
+    document.body.appendChild(container);
+    setTimeout(() => container.remove(), 600);
+  }
+
+  // Start with some default teams
+  teams = [
+    { name: '第一組', score: 0, color: COLORS[0] },
+    { name: '第二組', score: 0, color: COLORS[1] },
+    { name: '第三組', score: 0, color: COLORS[2] },
+    { name: '第四組', score: 0, color: COLORS[3] },
+  ];
+  render();
+</script>
+</body>
+</html>

@@ -423,6 +423,7 @@
 
     document.querySelectorAll('.preset').forEach(p => p.classList.remove('active'));
     event.target.classList.add('active');
+    saveTimerSettings();
     updateDisplay();
   }
 
@@ -437,6 +438,7 @@
       remainSeconds = total;
       document.getElementById('playBtn').textContent = '▶';
       document.querySelectorAll('.preset').forEach(p => p.classList.remove('active'));
+      saveTimerSettings();
       updateDisplay();
     }
   }
@@ -459,6 +461,25 @@
     document.getElementById('timeupOverlay').classList.remove('show');
     resetTimer();
   }
+
+  // localStorage persistence
+  const STORAGE_KEY = 'timer_settings';
+  function saveTimerSettings() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ totalSeconds }));
+  }
+  function loadTimerSettings() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const data = JSON.parse(saved);
+      if (data.totalSeconds > 0) {
+        totalSeconds = data.totalSeconds;
+        remainSeconds = data.totalSeconds;
+        document.getElementById('customMin').value = Math.floor(data.totalSeconds / 60);
+        document.getElementById('customSec').value = data.totalSeconds % 60;
+      }
+    }
+  }
+  loadTimerSettings();
 
   // Keyboard shortcuts
   document.addEventListener('keydown', e => {

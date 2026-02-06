@@ -238,16 +238,19 @@
 
     teams.push({ name, score: 0, color: COLORS[teams.length % COLORS.length] });
     input.value = '';
+    saveTeams();
     render();
   }
 
   function removeTeam(idx) {
     teams.splice(idx, 1);
+    saveTeams();
     render();
   }
 
   function changeScore(idx, delta) {
     teams[idx].score += delta;
+    saveTeams();
     render();
 
     // Animate score bump
@@ -267,11 +270,13 @@
 
   function resetScores() {
     teams.forEach(t => t.score = 0);
+    saveTeams();
     render();
   }
 
   function clearAll() {
     teams = [];
+    saveTeams();
     render();
   }
 
@@ -285,6 +290,19 @@
       rankMap[t.name] = rank;
     });
     return rankMap;
+  }
+
+  // localStorage persistence
+  const STORAGE_KEY = 'scoreboard_teams';
+  function saveTeams() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(teams));
+  }
+  function loadTeams() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const data = JSON.parse(saved);
+      if (Array.isArray(data) && data.length > 0) teams = data;
+    }
   }
 
   function render() {
@@ -352,13 +370,16 @@
     setTimeout(() => container.remove(), 600);
   }
 
-  // Start with some default teams
-  teams = [
-    { name: '第一組', score: 0, color: COLORS[0] },
-    { name: '第二組', score: 0, color: COLORS[1] },
-    { name: '第三組', score: 0, color: COLORS[2] },
-    { name: '第四組', score: 0, color: COLORS[3] },
-  ];
+  // Load saved data or start with defaults
+  loadTeams();
+  if (teams.length === 0) {
+    teams = [
+      { name: '第一組', score: 0, color: COLORS[0] },
+      { name: '第二組', score: 0, color: COLORS[1] },
+      { name: '第三組', score: 0, color: COLORS[2] },
+      { name: '第四組', score: 0, color: COLORS[3] },
+    ];
+  }
   render();
 </script>
 </body>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>課堂互動工具箱</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #1a1a2e;
+    --card: #16213e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --gold: #f5c518;
+    --text: #eaeaea;
+    --text-dim: #8892a4;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 40px 20px;
+  }
+  header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+  header h1 {
+    font-family: 'Fredoka', 'Noto Sans TC', sans-serif;
+    font-size: 2.6rem;
+    background: linear-gradient(135deg, var(--gold), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+  }
+  header p {
+    color: var(--text-dim);
+    font-size: 1rem;
+  }
+
+  .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 24px;
+  }
+
+  .tool-card {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 32px 24px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.06);
+    text-decoration: none;
+    color: var(--text);
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+  .tool-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    border-color: rgba(255,255,255,0.12);
+  }
+
+  .tool-icon {
+    font-size: 3.2rem;
+    line-height: 1;
+  }
+  .tool-name {
+    font-family: 'Fredoka', 'Noto Sans TC', sans-serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+  }
+  .tool-desc {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+  .tool-tag {
+    display: inline-block;
+    background: rgba(255,255,255,0.06);
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    color: var(--text-dim);
+  }
+
+  /* Color accent per card */
+  .tool-card:nth-child(1) { border-top: 3px solid var(--accent); }
+  .tool-card:nth-child(2) { border-top: 3px solid #448aff; }
+  .tool-card:nth-child(3) { border-top: 3px solid #6c63ff; }
+  .tool-card:nth-child(4) { border-top: 3px solid #2ecc71; }
+
+  footer {
+    text-align: center;
+    margin-top: 48px;
+    color: var(--text-dim);
+    font-size: 0.82rem;
+  }
+
+  @media (max-width: 550px) {
+    header h1 { font-size: 2rem; }
+    .tools-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>🧰 課堂互動工具箱</h1>
+    <p>一套專為老師設計的課堂互動小工具</p>
+  </header>
+
+  <div class="tools-grid">
+    <a class="tool-card" href="demo1-random-picker.html">
+      <div class="tool-icon">🎰</div>
+      <div class="tool-name">隨機抽籤器</div>
+      <div class="tool-desc">輸入學生名單，隨機抽取一位或多位同學，支援不重複抽取。</div>
+      <span class="tool-tag">抽籤 / 點名</span>
+    </a>
+
+    <a class="tool-card" href="demo2-quiz-game.html">
+      <div class="tool-icon">🧠</div>
+      <div class="tool-name">問答挑戰</div>
+      <div class="tool-desc">自訂題目進行四選一限時問答，即時回饋成績統計。</div>
+      <span class="tool-tag">測驗 / 問答</span>
+    </a>
+
+    <a class="tool-card" href="demo3-timer.html">
+      <div class="tool-icon">⏱</div>
+      <div class="tool-name">課堂計時器</div>
+      <div class="tool-desc">倒數計時搭配圓形進度環，支援預設時間與音效提示。</div>
+      <span class="tool-tag">計時 / 倒數</span>
+    </a>
+
+    <a class="tool-card" href="demo4-scoreboard.html">
+      <div class="tool-icon">🏅</div>
+      <div class="tool-name">課堂記分板</div>
+      <div class="tool-desc">為小組加減分，自動排名顯示金銀銅牌，激勵課堂參與。</div>
+      <span class="tool-tag">計分 / 競賽</span>
+    </a>
+  </div>
+
+  <footer>課堂互動工具箱 v1</footer>
+</div>
+
+</body>
+</html>

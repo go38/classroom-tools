@@ -432,10 +432,22 @@
     }
   }
 
+  // localStorage persistence
+  const STORAGE_KEY = 'picker_names';
+  function saveNames() {
+    localStorage.setItem(STORAGE_KEY, document.getElementById('nameInput').value);
+  }
+  function loadNames() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved !== null) document.getElementById('nameInput').value = saved;
+  }
+
   // Init
+  loadNames();
   renderPool();
   document.getElementById('nameInput').addEventListener('input', () => {
     pickedSet.clear();
+    saveNames();
     renderPool();
   });
 </script>

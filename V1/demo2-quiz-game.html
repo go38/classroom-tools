@@ -341,6 +341,18 @@
     document.getElementById(id).classList.add('active');
   }
 
+  // localStorage persistence
+  const STORAGE_KEY = 'quiz_questions';
+  function saveQuiz() {
+    localStorage.setItem(STORAGE_KEY, document.getElementById('quizInput').value);
+  }
+  function loadQuiz() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved !== null) document.getElementById('quizInput').value = saved;
+  }
+  loadQuiz();
+  document.getElementById('quizInput').addEventListener('input', saveQuiz);
+
   function startQuiz() {
     try {
       questions = JSON.parse(document.getElementById('quizInput').value);

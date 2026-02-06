@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>教室座位表</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1a1a2e">
+<link rel="apple-touch-icon" href="icon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #1a1a2e;
+    --card: #16213e;
+    --amber: #ff9800;
+    --amber-light: #ffb74d;
+    --amber-dark: #e68900;
+    --text: #eaeaea;
+    --text-dim: #8892a4;
+    --seat-bg: #1e2a45;
+    --seat-hover: #253350;
+    --seat-occupied: #2a3a5c;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: var(--bg);
+    background-image: radial-gradient(circle at 30% 20%, rgba(255,152,0,0.05) 0%, transparent 50%),
+                      radial-gradient(circle at 70% 80%, rgba(255,152,0,0.03) 0%, transparent 50%);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 20px;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .app { max-width: 960px; margin: 0 auto; }
+
+  .back-link {
+    display: inline-block;
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+    transition: color 0.2s;
+  }
+  .back-link:hover { color: var(--text); }
+
+  header { text-align: center; margin-bottom: 24px; }
+  header h1 {
+    font-family: 'Fredoka', 'Noto Sans TC', sans-serif;
+    font-size: 2.4rem;
+    color: var(--amber);
+    letter-spacing: 1px;
+  }
+  header p { color: var(--text-dim); font-size: 0.95rem; margin-top: 4px; }
+
+  /* Setup Panel */
+  .setup-panel {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .setup-row {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .setup-group { display: flex; flex-direction: column; gap: 6px; }
+  .setup-group label {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    font-weight: 700;
+  }
+  .setup-group textarea {
+    width: 320px;
+    height: 90px;
+    border: 2px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    color: var(--text);
+    background: var(--bg);
+    resize: vertical;
+    line-height: 1.5;
+  }
+  .setup-group textarea:focus { outline: none; border-color: var(--amber); }
+  .setup-group input[type="number"] {
+    width: 70px;
+    border: 2px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 8px 10px;
+    font-size: 1rem;
+    font-family: inherit;
+    color: var(--text);
+    background: var(--bg);
+    text-align: center;
+  }
+  .setup-group input[type="number"]:focus { outline: none; border-color: var(--amber); }
+  .row-col-group {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .row-col-group span {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    font-family: inherit;
+    font-weight: 700;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: transform 0.12s, background 0.2s;
+  }
+  .btn:active { transform: scale(0.95); }
+  .btn-primary {
+    background: var(--amber);
+    color: #1a1a2e;
+  }
+  .btn-primary:hover { background: var(--amber-light); }
+  .btn-secondary {
+    background: transparent;
+    color: var(--text-dim);
+    border: 2px solid rgba(255,255,255,0.1);
+  }
+  .btn-secondary:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+  .btn-apply {
+    background: rgba(255,152,0,0.15);
+    color: var(--amber);
+    border: 2px solid rgba(255,152,0,0.3);
+  }
+  .btn-apply:hover { background: rgba(255,152,0,0.25); }
+
+  /* Classroom Area */
+  .classroom { margin-top: 8px; }
+  .podium {
+    background: linear-gradient(135deg, var(--amber-dark), var(--amber));
+    color: #1a1a2e;
+    text-align: center;
+    padding: 10px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 12px rgba(255,152,0,0.2);
+  }
+
+  .seats-grid {
+    display: grid;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 24px;
+  }
+  .seat {
+    background: var(--seat-bg);
+    border: 2px solid rgba(255,255,255,0.06);
+    border-radius: 10px;
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    padding: 6px 4px;
+    text-align: center;
+    word-break: break-all;
+    position: relative;
+  }
+  .seat:hover { border-color: rgba(255,152,0,0.3); background: var(--seat-hover); }
+  .seat.occupied {
+    background: var(--seat-occupied);
+    border-color: rgba(255,152,0,0.4);
+    color: var(--amber-light);
+  }
+  .seat.drag-over {
+    border-color: var(--amber);
+    background: rgba(255,152,0,0.15);
+    box-shadow: 0 0 12px rgba(255,152,0,0.3);
+  }
+  .seat .seat-number {
+    position: absolute;
+    top: 2px;
+    left: 5px;
+    font-size: 0.6rem;
+    color: var(--text-dim);
+    font-weight: 400;
+    opacity: 0.5;
+  }
+
+  /* Unassigned Area */
+  .unassigned-area {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 16px 20px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .unassigned-area h3 {
+    font-size: 0.95rem;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+  }
+  .unassigned-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-height: 40px;
+  }
+  .student-tag {
+    background: rgba(255,152,0,0.15);
+    color: var(--amber-light);
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: grab;
+    transition: all 0.15s;
+    border: 2px solid transparent;
+  }
+  .student-tag:hover {
+    background: rgba(255,152,0,0.25);
+    border-color: rgba(255,152,0,0.4);
+  }
+  .student-tag.dragging {
+    opacity: 0.4;
+  }
+  .unassigned-list.drag-over {
+    background: rgba(255,152,0,0.05);
+    border-radius: 8px;
+  }
+  .empty-hint {
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    opacity: 0.6;
+    padding: 4px;
+  }
+
+  /* Touch drag ghost */
+  .drag-ghost {
+    position: fixed;
+    pointer-events: none;
+    z-index: 1000;
+    background: var(--amber);
+    color: #1a1a2e;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    transform: translate(-50%, -50%);
+  }
+
+  @media (max-width: 600px) {
+    header h1 { font-size: 1.8rem; }
+    .setup-row { flex-direction: column; }
+    .setup-group textarea { width: 100%; }
+    .seats-grid { gap: 5px; }
+    .seat { min-height: 42px; font-size: 0.75rem; border-radius: 8px; }
+    .podium { font-size: 0.9rem; padding: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <a class="back-link" href="index.html">← 返回首頁</a>
+  <header>
+    <h1>💺 教室座位表</h1>
+    <p>視覺化教室座位安排，拖拽調整或隨機分配</p>
+  </header>
+
+  <div class="setup-panel">
+    <div class="setup-row">
+      <div class="setup-group" style="flex:1;min-width:200px;">
+        <label>學生名單（每行一位）</label>
+        <textarea id="studentInput">王小明
+李小華
+張大方
+陳美玲
+林志豪
+黃雅婷
+劉建宏
+吳佳穎
+蔡宗翰
+楊淑芬
+鄭凱文
+謝宜蓁
+周俊傑
+許雅琪
+洪偉成</textarea>
+      </div>
+      <div class="setup-group">
+        <label>教室配置</label>
+        <div class="row-col-group">
+          <input type="number" id="rowsInput" min="1" max="12" value="5">
+          <span>列</span>
+          <span>×</span>
+          <input type="number" id="colsInput" min="1" max="12" value="6">
+          <span>行</span>
+        </div>
+        <div class="action-buttons" style="margin-top:10px;">
+          <button class="btn btn-apply" onclick="applySettings()">✅ 套用名單</button>
+        </div>
+      </div>
+    </div>
+    <div class="action-buttons">
+      <button class="btn btn-primary" onclick="randomAssign()">🎲 隨機分配</button>
+      <button class="btn btn-secondary" onclick="clearSeats()">🗑 清空座位</button>
+    </div>
+  </div>
+
+  <div class="classroom">
+    <div class="podium">講 台</div>
+    <div class="seats-grid" id="seatsGrid"></div>
+  </div>
+
+  <div class="unassigned-area">
+    <h3>📋 未安排學生</h3>
+    <div class="unassigned-list" id="unassignedList"></div>
+  </div>
+</div>
+
+<script>
+  const STORAGE_KEY = 'seating_data';
+
+  let students = [];
+  let rows = 5;
+  let cols = 6;
+  // seats[row][col] = student name or null
+  let seats = [];
+
+  // Drag state
+  let dragSource = null; // { type: 'seat'|'unassigned', row, col, name }
+
+  // Touch drag state
+  let touchDragSource = null;
+  let touchGhost = null;
+  let touchCurrentTarget = null;
+
+  /* ===== Initialization ===== */
+  function init() {
+    loadData();
+    document.getElementById('studentInput').value = students.join('\n');
+    document.getElementById('rowsInput').value = rows;
+    document.getElementById('colsInput').value = cols;
+    render();
+  }
+
+  /* ===== Settings ===== */
+  function applySettings() {
+    const text = document.getElementById('studentInput').value.trim();
+    const newStudents = text ? text.split('\n').map(s => s.trim()).filter(s => s) : [];
+    const newRows = Math.max(1, Math.min(12, parseInt(document.getElementById('rowsInput').value) || 5));
+    const newCols = Math.max(1, Math.min(12, parseInt(document.getElementById('colsInput').value) || 6));
+
+    // If dimensions changed, rebuild seats
+    if (newRows !== rows || newCols !== cols) {
+      rows = newRows;
+      cols = newCols;
+      seats = Array.from({ length: rows }, () => Array(cols).fill(null));
+    }
+
+    // Find removed students and clear their seats
+    const newSet = new Set(newStudents);
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        if (seats[r][c] && !newSet.has(seats[r][c])) {
+          seats[r][c] = null;
+        }
+      }
+    }
+
+    students = newStudents;
+    saveData();
+    render();
+  }
+
+  /* ===== Random Assignment (Fisher-Yates) ===== */
+  function randomAssign() {
+    seats = Array.from({ length: rows }, () => Array(cols).fill(null));
+    const shuffled = [...students];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+
+    let idx = 0;
+    for (let r = 0; r < rows && idx < shuffled.length; r++) {
+      for (let c = 0; c < cols && idx < shuffled.length; c++) {
+        seats[r][c] = shuffled[idx++];
+      }
+    }
+
+    saveData();
+    render();
+  }
+
+  /* ===== Clear Seats ===== */
+  function clearSeats() {
+    seats = Array.from({ length: rows }, () => Array(cols).fill(null));
+    saveData();
+    render();
+  }
+
+  /* ===== Get Unassigned Students ===== */
+  function getUnassigned() {
+    const seated = new Set();
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        if (seats[r][c]) seated.add(seats[r][c]);
+      }
+    }
+    return students.filter(s => !seated.has(s));
+  }
+
+  /* ===== Render ===== */
+  function render() {
+    renderSeats();
+    renderUnassigned();
+  }
+
+  function renderSeats() {
+    const grid = document.getElementById('seatsGrid');
+    grid.style.gridTemplateColumns = `repeat(${cols}, minmax(60px, 1fr))`;
+    grid.innerHTML = '';
+
+    let seatNum = 0;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        seatNum++;
+        const seat = document.createElement('div');
+        seat.className = 'seat' + (seats[r][c] ? ' occupied' : '');
+        seat.dataset.row = r;
+        seat.dataset.col = c;
+        seat.innerHTML = `<span class="seat-number">${seatNum}</span>${seats[r][c] || ''}`;
+
+        // Click: remove student from seat
+        seat.addEventListener('click', () => {
+          if (seats[r][c]) {
+            seats[r][c] = null;
+            saveData();
+            render();
+          }
+        });
+
+        // HTML5 Drag & Drop
+        seat.draggable = !!seats[r][c];
+        seat.addEventListener('dragstart', (e) => {
+          if (!seats[r][c]) return;
+          dragSource = { type: 'seat', row: r, col: c, name: seats[r][c] };
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('text/plain', seats[r][c]);
+          seat.style.opacity = '0.4';
+        });
+        seat.addEventListener('dragend', () => {
+          seat.style.opacity = '1';
+          dragSource = null;
+        });
+        seat.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+          seat.classList.add('drag-over');
+        });
+        seat.addEventListener('dragleave', () => {
+          seat.classList.remove('drag-over');
+        });
+        seat.addEventListener('drop', (e) => {
+          e.preventDefault();
+          seat.classList.remove('drag-over');
+          if (!dragSource) return;
+
+          if (dragSource.type === 'unassigned') {
+            // Place unassigned student into this seat
+            const existing = seats[r][c];
+            seats[r][c] = dragSource.name;
+            // If seat was occupied, the displaced student goes back to unassigned
+            // (no action needed since unassigned is derived)
+          } else if (dragSource.type === 'seat') {
+            // Swap two seats
+            const fromR = dragSource.row;
+            const fromC = dragSource.col;
+            const temp = seats[r][c];
+            seats[r][c] = seats[fromR][fromC];
+            seats[fromR][fromC] = temp;
+          }
+
+          dragSource = null;
+          saveData();
+          render();
+        });
+
+        // Touch support
+        seat.addEventListener('touchstart', (e) => handleTouchStart(e, seats[r][c] ? { type: 'seat', row: r, col: c, name: seats[r][c] } : null), { passive: false });
+
+        grid.appendChild(seat);
+      }
+    }
+  }
+
+  function renderUnassigned() {
+    const list = document.getElementById('unassignedList');
+    const unassigned = getUnassigned();
+
+    if (unassigned.length === 0) {
+      list.innerHTML = '<span class="empty-hint">所有學生皆已入座</span>';
+      if (students.length === 0) {
+        list.innerHTML = '<span class="empty-hint">請先輸入學生名單並套用</span>';
+      }
+      return;
+    }
+
+    list.innerHTML = '';
+    unassigned.forEach(name => {
+      const tag = document.createElement('div');
+      tag.className = 'student-tag';
+      tag.textContent = name;
+      tag.draggable = true;
+
+      tag.addEventListener('dragstart', (e) => {
+        dragSource = { type: 'unassigned', name };
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', name);
+        tag.classList.add('dragging');
+      });
+      tag.addEventListener('dragend', () => {
+        tag.classList.remove('dragging');
+        dragSource = null;
+      });
+
+      // Touch support
+      tag.addEventListener('touchstart', (e) => handleTouchStart(e, { type: 'unassigned', name }), { passive: false });
+
+      list.appendChild(tag);
+    });
+
+    // Allow drop back to unassigned area
+    list.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      list.classList.add('drag-over');
+    });
+    list.addEventListener('dragleave', () => {
+      list.classList.remove('drag-over');
+    });
+    list.addEventListener('drop', (e) => {
+      e.preventDefault();
+      list.classList.remove('drag-over');
+      if (dragSource && dragSource.type === 'seat') {
+        seats[dragSource.row][dragSource.col] = null;
+        dragSource = null;
+        saveData();
+        render();
+      }
+    });
+  }
+
+  /* ===== Touch Drag Support ===== */
+  function handleTouchStart(e, source) {
+    if (!source) return;
+    e.preventDefault();
+
+    touchDragSource = source;
+    const touch = e.touches[0];
+
+    // Create ghost element
+    touchGhost = document.createElement('div');
+    touchGhost.className = 'drag-ghost';
+    touchGhost.textContent = source.name;
+    touchGhost.style.left = touch.clientX + 'px';
+    touchGhost.style.top = touch.clientY + 'px';
+    document.body.appendChild(touchGhost);
+
+    // Dim original
+    e.currentTarget.style.opacity = '0.4';
+    const originalEl = e.currentTarget;
+
+    const onTouchMove = (ev) => {
+      ev.preventDefault();
+      const t = ev.touches[0];
+      if (touchGhost) {
+        touchGhost.style.left = t.clientX + 'px';
+        touchGhost.style.top = t.clientY + 'px';
+      }
+
+      // Find element under touch
+      if (touchGhost) touchGhost.style.display = 'none';
+      const el = document.elementFromPoint(t.clientX, t.clientY);
+      if (touchGhost) touchGhost.style.display = '';
+
+      // Clear previous highlights
+      document.querySelectorAll('.drag-over').forEach(x => x.classList.remove('drag-over'));
+
+      if (el) {
+        const seatEl = el.closest('.seat');
+        if (seatEl) {
+          seatEl.classList.add('drag-over');
+          touchCurrentTarget = { type: 'seat', el: seatEl };
+        } else if (el.closest('.unassigned-list')) {
+          el.closest('.unassigned-list').classList.add('drag-over');
+          touchCurrentTarget = { type: 'unassigned' };
+        } else {
+          touchCurrentTarget = null;
+        }
+      }
+    };
+
+    const onTouchEnd = () => {
+      document.removeEventListener('touchmove', onTouchMove);
+      document.removeEventListener('touchend', onTouchEnd);
+      if (touchGhost) { touchGhost.remove(); touchGhost = null; }
+      originalEl.style.opacity = '1';
+      document.querySelectorAll('.drag-over').forEach(x => x.classList.remove('drag-over'));
+
+      if (touchCurrentTarget && touchDragSource) {
+        if (touchCurrentTarget.type === 'seat') {
+          const r = parseInt(touchCurrentTarget.el.dataset.row);
+          const c = parseInt(touchCurrentTarget.el.dataset.col);
+
+          if (touchDragSource.type === 'unassigned') {
+            seats[r][c] = touchDragSource.name;
+          } else if (touchDragSource.type === 'seat') {
+            const fromR = touchDragSource.row;
+            const fromC = touchDragSource.col;
+            const temp = seats[r][c];
+            seats[r][c] = seats[fromR][fromC];
+            seats[fromR][fromC] = temp;
+          }
+          saveData();
+          render();
+        } else if (touchCurrentTarget.type === 'unassigned' && touchDragSource.type === 'seat') {
+          seats[touchDragSource.row][touchDragSource.col] = null;
+          saveData();
+          render();
+        }
+      }
+
+      touchDragSource = null;
+      touchCurrentTarget = null;
+    };
+
+    document.addEventListener('touchmove', onTouchMove, { passive: false });
+    document.addEventListener('touchend', onTouchEnd);
+  }
+
+  /* ===== localStorage ===== */
+  function saveData() {
+    const data = { students, rows, cols, seats };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
+
+  function loadData() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const data = JSON.parse(saved);
+        if (data.students && Array.isArray(data.students)) students = data.students;
+        if (data.rows) rows = data.rows;
+        if (data.cols) cols = data.cols;
+        if (data.seats && Array.isArray(data.seats)) {
+          seats = data.seats;
+          // Ensure dimensions match
+          if (seats.length !== rows || (seats[0] && seats[0].length !== cols)) {
+            seats = Array.from({ length: rows }, () => Array(cols).fill(null));
+          }
+          return;
+        }
+      }
+    } catch (e) { /* ignore parse errors */ }
+
+    // Defaults
+    if (students.length === 0) {
+      students = document.getElementById('studentInput').value.trim().split('\n').map(s => s.trim()).filter(s => s);
+    }
+    seats = Array.from({ length: rows }, () => Array(cols).fill(null));
+  }
+
+  /* ===== Start ===== */
+  init();
+</script>
+</body>
+</html>

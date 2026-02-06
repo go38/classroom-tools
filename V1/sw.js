@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const CACHE_NAME = `classroom-tools-${CACHE_VERSION}`;
 
 const PRECACHE_URLS = [
@@ -7,6 +7,7 @@ const PRECACHE_URLS = [
   'demo2-quiz-game.html',
   'demo3-timer.html',
   'demo4-scoreboard.html',
+  'demo5-seating.html',
   'manifest.json',
   'icon.svg'
 ];
